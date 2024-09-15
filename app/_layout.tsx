@@ -1,9 +1,20 @@
-import { Stack } from "expo-router";
+import React from 'react';
+import { SafeAreaView, StyleSheet } from 'react-native';
+import TodoList from '../components/TodoList';
 
-export default function RootLayout() {
+const Layout = () => {
   return (
-    <Stack>
-      <Stack.Screen name="index" />
-    </Stack>
+    <SafeAreaView style={styles.container}>
+      <TodoList />
+    </SafeAreaView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+});
+
+export default Layout;
