@@ -13,7 +13,7 @@ const Layout = () => {
         {/* "Check All" button */}
         <Icon
           name={massCheck ? "check-box" : "check-box-outline-blank"}
-          size={28}
+          size={36}
           color="black"
           onPress={() => setMassCheck(!massCheck)} // Toggle mass check state
         />
@@ -34,10 +34,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 15,
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
   },
 });
