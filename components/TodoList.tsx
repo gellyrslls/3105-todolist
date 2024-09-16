@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, FlatList, StyleSheet, Text } from 'react-native';
-import { CheckBox } from 'react-native-elements'; // Import CheckBox from react-native-elements
+import { View, TextInput, Button, FlatList, StyleSheet, Text, Modal, Pressable } from 'react-native';
+import { CheckBox } from 'react-native-elements';
+import { FAB } from 'react-native-paper';
 
-// Each item will have an ID, text content, and a checked state
 interface TodoItem {
   id: number;
   text: string;
@@ -10,11 +10,11 @@ interface TodoItem {
 }
 
 const TodoList = () => {
-  const [todos, setTodos] = useState<TodoItem[]>([]); // Stores all the to-do items
-  const [inputText, setInputText] = useState('');     // Stores the input text for a new task
-  const [massCheck, setMassCheck] = useState(false);  // Toggles mass check/uncheck
+  const [todos, setTodos] = useState<TodoItem[]>([]);
+  const [inputText, setInputText] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [massCheck, setMassCheck] = useState(false);
 
-  // Function to add a new todo item
   const addTodo = () => {
     if (inputText.trim() !== '') {
       const newTodo = {
@@ -22,12 +22,12 @@ const TodoList = () => {
         text: inputText,
         checked: false,
       };
-      setTodos([...todos, newTodo]);  // Add new item to the list
-      setInputText('');               // Clear the input
+      setTodos([...todos, newTodo]);
+      setInputText('');
+      setModalVisible(false); // Close the modal after adding the task
     }
   };
 
-  // Function to toggle check/uncheck for individual items
   const toggleCheck = (id: number) => {
     const updatedTodos = todos.map(todo =>
       todo.id === id ? { ...todo, checked: !todo.checked } : todo
@@ -35,35 +35,22 @@ const TodoList = () => {
     setTodos(updatedTodos);
   };
 
-  // Function to mass check/uncheck all items
   const toggleMassCheck = () => {
     const updatedTodos = todos.map(todo => ({
       ...todo,
-      checked: !massCheck,  // Set all items' checked state based on massCheck
+      checked: !massCheck,
     }));
     setTodos(updatedTodos);
-    setMassCheck(!massCheck);  // Toggle massCheck state
+    setMassCheck(!massCheck);
   };
 
-  // Function to delete a todo item
   const deleteTodo = (id: number) => {
     const filteredTodos = todos.filter(todo => todo.id !== id);
-    setTodos(filteredTodos);  // Update the list by removing the selected item
+    setTodos(filteredTodos);
   };
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Add a task..."
-        value={inputText}
-        onChangeText={setInputText}
-      />
-      <Button title="Add Task" onPress={addTodo} />
-
-      {/* Mass check/uncheck button */}
-      <Button title={massCheck ? "Uncheck All" : "Check All"} onPress={toggleMassCheck} />
-
       {/* FlatList to render all the tasks */}
       <FlatList
         data={todos}
@@ -83,6 +70,37 @@ const TodoList = () => {
           </View>
         )}
       />
+
+      {/* Modal for adding new tasks */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalView}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter task..."
+            value={inputText}
+            onChangeText={setInputText}
+          />
+          <Pressable style={styles.button} onPress={addTodo}>
+            <Text style={styles.buttonText}>Add Task</Text>
+          </Pressable>
+          <Pressable style={styles.button} onPress={() => setModalVisible(false)}>
+            <Text style={styles.buttonText}>Cancel</Text>
+          </Pressable>
+        </View>
+      </Modal>
+
+      {/* Floating Action Button */}
+      <FAB
+        style={styles.fab}
+        small
+        icon="plus"
+        onPress={() => setModalVisible(true)}
+      />
     </View>
   );
 };
@@ -98,6 +116,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     marginBottom: 10,
+    width: '80%',
   },
   todoItem: {
     flexDirection: 'row',
@@ -114,11 +133,42 @@ const styles = StyleSheet.create({
   checkedText: {
     textDecorationLine: 'line-through',
     color: 'green',
-    flex: 1, // Let text take up remaining space
+    flex: 1,
   },
   uncheckedText: {
     color: '#000',
-    flex: 1, // Let text take up remaining space
+    flex: 1,
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#6200ee',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    backgroundColor: '#2196F3',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 5,
+    width: '80%',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
   },
 });
 
