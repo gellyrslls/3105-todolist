@@ -1,20 +1,27 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, FlatList, StyleSheet, Text, Modal, Pressable } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, StyleSheet, Text, Modal, Pressable, TextInput } from 'react-native';
 import { CheckBox } from 'react-native-elements';
 import { FAB } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
+// Todo item type
 interface TodoItem {
   id: number;
   text: string;
   checked: boolean;
 }
 
-const TodoList = () => {
+interface TodoListProps {
+  massCheck: boolean;
+  setMassCheck: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const TodoList: React.FC<TodoListProps> = ({ massCheck, setMassCheck }) => {
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [inputText, setInputText] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [massCheck, setMassCheck] = useState(false);
 
+  // Function to add a new todo item
   const addTodo = () => {
     if (inputText.trim() !== '') {
       const newTodo = {
@@ -24,10 +31,11 @@ const TodoList = () => {
       };
       setTodos([...todos, newTodo]);
       setInputText('');
-      setModalVisible(false); // Close the modal after adding the task
+      setModalVisible(false);
     }
   };
 
+  // Function to toggle individual todo check
   const toggleCheck = (id: number) => {
     const updatedTodos = todos.map(todo =>
       todo.id === id ? { ...todo, checked: !todo.checked } : todo
@@ -35,15 +43,16 @@ const TodoList = () => {
     setTodos(updatedTodos);
   };
 
-  const toggleMassCheck = () => {
+  // Effect to update all todos when "Check All" is toggled
+  useEffect(() => {
     const updatedTodos = todos.map(todo => ({
       ...todo,
-      checked: !massCheck,
+      checked: massCheck, // Apply mass check state to all todos
     }));
     setTodos(updatedTodos);
-    setMassCheck(!massCheck);
-  };
+  }, [massCheck]); // This effect runs whenever massCheck changes
 
+  // Function to delete a todo item
   const deleteTodo = (id: number) => {
     const filteredTodos = todos.filter(todo => todo.id !== id);
     setTodos(filteredTodos);
@@ -51,7 +60,6 @@ const TodoList = () => {
 
   return (
     <View style={styles.container}>
-      {/* FlatList to render all the tasks */}
       <FlatList
         data={todos}
         keyExtractor={(item) => item.id.toString()}
@@ -66,41 +74,38 @@ const TodoList = () => {
             <Text style={item.checked ? styles.checkedText : styles.uncheckedText}>
               {item.text}
             </Text>
-            <Button title="Delete" onPress={() => deleteTodo(item.id)} />
+            <Pressable onPress={() => deleteTodo(item.id)}>
+              <Icon name="delete" size={30} color="red" />
+            </Pressable>
           </View>
         )}
       />
 
-      {/* Modal for adding new tasks */}
+      <FAB
+        style={styles.fab}
+        small={false}
+        icon="plus"
+        onPress={() => setModalVisible(true)}
+      />
+
       <Modal
-        visible={modalVisible}
         animationType="slide"
         transparent={true}
+        visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalView}>
           <TextInput
             style={styles.input}
-            placeholder="Enter task..."
+            placeholder="Add a task..."
             value={inputText}
             onChangeText={setInputText}
           />
-          <Pressable style={styles.button} onPress={addTodo}>
-            <Text style={styles.buttonText}>Add Task</Text>
-          </Pressable>
-          <Pressable style={styles.button} onPress={() => setModalVisible(false)}>
-            <Text style={styles.buttonText}>Cancel</Text>
+          <Pressable style={styles.addButton} onPress={addTodo}>
+            <Text style={styles.addButtonText}>Add Task</Text>
           </Pressable>
         </View>
       </Modal>
-
-      {/* Floating Action Button */}
-      <FAB
-        style={styles.fab}
-        small
-        icon="plus"
-        onPress={() => setModalVisible(true)}
-      />
     </View>
   );
 };
@@ -110,13 +115,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',
-  },
-  input: {
-    borderColor: '#ccc',
-    borderWidth: 1,
-    padding: 10,
-    marginBottom: 10,
-    width: '80%',
   },
   todoItem: {
     flexDirection: 'row',
@@ -144,31 +142,29 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
-    backgroundColor: '#6200ee',
+    backgroundColor: '#007bff',
   },
   modalView: {
-    margin: 20,
-    backgroundColor: 'white',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  input: {
+    backgroundColor: '#fff',
+    padding: 15,
+    marginBottom: 10,
     borderRadius: 10,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    backgroundColor: '#2196F3',
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 5,
     width: '80%',
-    alignItems: 'center',
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
+  addButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 10,
+  },
+  addButtonText: {
+    color: '#fff',
+    textAlign: 'center',
   },
 });
 
