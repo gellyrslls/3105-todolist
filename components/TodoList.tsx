@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, StyleSheet, Text, Modal, Pressable, TextInput } from 'react-native';
+import { View, FlatList, StyleSheet, Text, Modal, Pressable, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { CheckBox } from 'react-native-elements';
 import { FAB } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -75,7 +75,7 @@ const TodoList: React.FC<TodoListProps> = ({ massCheck, setMassCheck }) => {
               {item.text}
             </Text>
             <Pressable onPress={() => deleteTodo(item.id)}>
-              <Icon name="delete" size={30} color="red" />
+              <Icon name="delete" size={30} color="#8a8a8a" />
             </Pressable>
           </View>
         )}
@@ -94,17 +94,23 @@ const TodoList: React.FC<TodoListProps> = ({ massCheck, setMassCheck }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalView}>
-          <TextInput
-            style={styles.input}
-            placeholder="Add a task..."
-            value={inputText}
-            onChangeText={setInputText}
-          />
-          <Pressable style={styles.addButton} onPress={addTodo}>
-            <Text style={styles.addButtonText}>Add Task</Text>
-          </Pressable>
-        </View>
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <View style={styles.modalView}>
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+              <View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="New task"
+                  value={inputText}
+                  onChangeText={setInputText}
+                />
+                <Pressable style={styles.addButton} onPress={addTodo}>
+                  <Text style={styles.addButtonText}>Save</Text>
+                </Pressable>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
@@ -130,7 +136,7 @@ const styles = StyleSheet.create({
   },
   checkedText: {
     textDecorationLine: 'line-through',
-    color: 'green',
+    color: '#8a8a8a',
     flex: 1,
   },
   uncheckedText: {
@@ -139,10 +145,11 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
+    padding: 5,
     margin: 16,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#007bff',
+    right: -15,
+    bottom: 10,
+    backgroundColor: '#9dbefc',
   },
   modalView: {
     flex: 1,
