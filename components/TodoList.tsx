@@ -4,7 +4,6 @@ import { CheckBox } from 'react-native-elements';
 import { FAB } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-// Todo item type
 interface TodoItem {
   id: number;
   text: string;
@@ -12,16 +11,17 @@ interface TodoItem {
 }
 
 interface TodoListProps {
+  todos: TodoItem[];
+  setTodos: React.Dispatch<React.SetStateAction<TodoItem[]>>;
   massCheck: boolean;
   setMassCheck: React.Dispatch<React.SetStateAction<boolean>>;
+  setCheckedCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const TodoList: React.FC<TodoListProps> = ({ massCheck, setMassCheck }) => {
-  const [todos, setTodos] = useState<TodoItem[]>([]);
+const TodoList: React.FC<TodoListProps> = ({ todos, setTodos, massCheck, setMassCheck, setCheckedCount }) => {
   const [inputText, setInputText] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Function to add a new todo item
   const addTodo = () => {
     if (inputText.trim() !== '') {
       const newTodo = {
@@ -35,7 +35,6 @@ const TodoList: React.FC<TodoListProps> = ({ massCheck, setMassCheck }) => {
     }
   };
 
-  // Function to toggle individual todo check
   const toggleCheck = (id: number) => {
     const updatedTodos = todos.map(todo =>
       todo.id === id ? { ...todo, checked: !todo.checked } : todo
@@ -43,20 +42,18 @@ const TodoList: React.FC<TodoListProps> = ({ massCheck, setMassCheck }) => {
     setTodos(updatedTodos);
   };
 
-  // Effect to update all todos when "Check All" is toggled
   useEffect(() => {
     const updatedTodos = todos.map(todo => ({
       ...todo,
-      checked: massCheck, // Apply mass check state to all todos
+      checked: massCheck,
     }));
     setTodos(updatedTodos);
-  }, [massCheck]); // This effect runs whenever massCheck changes
+  }, [massCheck]);
 
-  // Function to delete a todo item
-  const deleteTodo = (id: number) => {
-    const filteredTodos = todos.filter(todo => todo.id !== id);
-    setTodos(filteredTodos);
-  };
+  useEffect(() => {
+    const checkedTodosCount = todos.filter(todo => todo.checked).length;
+    setCheckedCount(checkedTodosCount);
+  }, [todos, setCheckedCount]);
 
   return (
     <View style={styles.container}>
@@ -69,14 +66,11 @@ const TodoList: React.FC<TodoListProps> = ({ massCheck, setMassCheck }) => {
               checked={item.checked}
               onPress={() => toggleCheck(item.id)}
               containerStyle={styles.checkboxContainer}
-              checkedColor="green"
+              checkedColor="#8a8a8a"
             />
             <Text style={item.checked ? styles.checkedText : styles.uncheckedText}>
               {item.text}
             </Text>
-            <Pressable onPress={() => deleteTodo(item.id)}>
-              <Icon name="delete" size={30} color="#8a8a8a" />
-            </Pressable>
           </View>
         )}
       />
