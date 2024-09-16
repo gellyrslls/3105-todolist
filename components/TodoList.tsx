@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, FlatList, StyleSheet, Text, Modal, Pressable, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, FlatList, StyleSheet, Text, Modal, Pressable, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
 import { CheckBox } from 'react-native-elements';
 import { FAB } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -21,6 +21,7 @@ interface TodoListProps {
 const TodoList: React.FC<TodoListProps> = ({ todos, setTodos, massCheck, setMassCheck, setCheckedCount }) => {
   const [inputText, setInputText] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const inputRef = useRef<TextInput>(null);
 
   const addTodo = () => {
     if (inputText.trim() !== '') {
@@ -54,6 +55,14 @@ const TodoList: React.FC<TodoListProps> = ({ todos, setTodos, massCheck, setMass
     const checkedTodosCount = todos.filter(todo => todo.checked).length;
     setCheckedCount(checkedTodosCount);
   }, [todos, setCheckedCount]);
+
+  useEffect(() => {
+    if (modalVisible && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [modalVisible]);
 
   return (
     <View style={styles.container}>
@@ -89,19 +98,29 @@ const TodoList: React.FC<TodoListProps> = ({ todos, setTodos, massCheck, setMass
         onRequestClose={() => setModalVisible(false)}
       >
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalView}>
+          <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-              <View>
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.modalView}
+              >
                 <TextInput
+                  ref={inputRef}
                   style={styles.input}
                   placeholder="New task"
                   value={inputText}
                   onChangeText={setInputText}
                 />
-                <Pressable style={styles.addButton} onPress={addTodo}>
-                  <Text style={styles.addButtonText}>Save</Text>
+
+                <Pressable
+                  onPress={addTodo}
+                  disabled={inputText.trim() === ''}
+                >
+                  <Text style={[styles.saveButtonText, inputText.trim() === '' ? styles.disabledText : styles.activeText]}>
+                    Save
+                  </Text>
                 </Pressable>
-              </View>
+              </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
@@ -145,27 +164,37 @@ const styles = StyleSheet.create({
     bottom: 10,
     backgroundColor: '#9dbefc',
   },
-  modalView: {
+  modalBackdrop: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalView: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    position: 'relative',
   },
   input: {
     backgroundColor: '#fff',
     padding: 15,
     marginBottom: 10,
     borderRadius: 10,
-    width: '80%',
+    width: '100%',
   },
-  addButton: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 10,
+  saveButtonText: {
+    fontWeight: 'bold',
+    fontSize: 16,
   },
-  addButtonText: {
-    color: '#fff',
-    textAlign: 'center',
+  activeText: {
+    color: '#007bff',
+  },
+  disabledText: {
+    color: '#d3d3d3',
   },
 });
 
