@@ -2,12 +2,20 @@ import React, { useState } from 'react';
 import { FlatList, StyleSheet, Text, View, Button } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 
-const TodoList = () => {
+const TodoList = ({ massCheck, setMassCheck }: { massCheck?: boolean; setMassCheck?: React.Dispatch<React.SetStateAction<boolean>> }) => {
   const [tasks, setTasks] = useState([
     { id: 1, text: 'Buy groceries', done: false },
     { id: 2, text: 'Walk the dog', done: false },
     { id: 3, text: 'Finish homework', done: false },
   ]);
+
+  React.useEffect(() => {
+    if (massCheck !== undefined) {
+      setTasks((prevTasks) =>
+        prevTasks.map((task) => ({ ...task, done: massCheck }))
+      );
+    }
+  }, [massCheck]);
 
   const toggleTask = (taskId: number) => {
     setTasks((prevTasks) =>
@@ -20,9 +28,9 @@ const TodoList = () => {
   const renderItem = ({ item }: { item: { id: number; text: string; done: boolean } }) => (
     <View style={styles.taskContainer}>
       <CheckBox
-        checked={item.done}
-        onPress={() => toggleTask(item.id)}
-        containerStyle={styles.checkbox}
+        value={item.done}
+        onValueChange={() => toggleTask(item.id)}
+        style={styles.checkbox}
       />
       <Text style={[styles.taskText, item.done && styles.taskDone]}>
         {item.text}
@@ -60,7 +68,7 @@ const styles = StyleSheet.create({
   },
   taskDone: {
     textDecorationLine: 'line-through',
-    color: '#888',
+    color: 'green',
   },
 });
 
